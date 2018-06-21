@@ -80,8 +80,8 @@ declare -a staticRoute
 # List of AWS Regions with Classic VPNs
 regionList=(us-east-1 us-west-1 us-west-2 eu-west-1 eu-central-1 ap-southeast-1 ap-southeast-2 ap-northeast-1 sa-east-1)
 
-echo "Please enter the AWS Region in which you have Classic VPN(s) [Format - us-east-1]:"
-read region
+echo
+read -p "Please enter the AWS Region in which you have Classic VPN(s) [Format - us-east-1]: " region
 regFlag=0
 
 # Region should exist in the list of regions with Classic VPNs
@@ -106,8 +106,7 @@ done
 
 # Get the old VGW
 echo
-echo "Please enter the VGW associated with Classic VPN(s) in $region [Format - vgw-########]:"
-read oldVgw
+read -p "Please enter the VGW associated with Classic VPN(s) in $region [Format - vgw-########]: " oldVgw
 
 # Check 1 - VGW exists in the region
 vgwExists $oldVgw
