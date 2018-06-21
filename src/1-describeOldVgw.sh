@@ -138,26 +138,35 @@ else
   if [ $isOldVgwInRes -eq 0 ]; then
     echo "Old VGW: $oldVgw" >> $res
   else
+    # Make sure that only 1(Yes) or 2(No) are entered as the options.
+    # If 1   - Proceed
+    # Elif 2 - Exit
+    # Else   - Ask to enter option again
+    # Avoids treating normally correct responses (y, Y, Yes, etc.) as incorrect.
     echo
-    echo "You have already stored the information for this VGW"
-    echo "Do you still want to proceed? Please enter 'yes' or 'no'"
-    read procOpt
-
-    # Make sure that only yes or no are entered as the options
-    # If no - Exit
-    # If yes - Proceed
-    # Other options - Ask to enter option again
-    while true; do
-      if [ $procOpt == "no" ]; then
-        echo
-        echo "Exiting the script"
-        exit 1
-      elif [ $procOpt == "yes" ]; then
-        break
-      else
-        echo "Please enter a valid option: 'yes' or 'no'"
-        read procOpt
-      fi
+    echo "You have already stored the information for this VGW."
+    echo "Do you still wish to proceed?"
+    echo
+    echo "Enter 1 for Yes, or 2 for No: "
+    echo
+    procOpts=("Yes" "No")
+    select procOpt in "${procOpts[@]}";
+    do
+      case $procOpt in
+        Yes)
+          break
+          ;;
+        No)
+          echo
+          echo "Exiting the script"
+          exit 1
+          ;;
+        *)
+          echo
+          echo 'Please enter a valid option: 1 for "Yes", or 2 for "No".'
+          echo
+          ;;
+      esac
     done
   fi
 
