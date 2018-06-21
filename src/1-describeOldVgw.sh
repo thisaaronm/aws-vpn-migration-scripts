@@ -134,7 +134,7 @@ elif [ $isDxGw ]; then
   exit 1
 else
 
-# If the Old VGW is already stored in resources.txt, give an option of not storing the details again
+  # If the Old VGW is already stored in resources.txt, give an option of not storing the details again
   isOldVgwInRes=$(cat $res | grep $oldVgw | wc -l)
   if [ $isOldVgwInRes -eq 0 ]; then
     echo "Old VGW: $oldVgw" >> $res
@@ -144,10 +144,10 @@ else
     echo "Do you still want to proceed? Please enter 'yes' or 'no'"
     read procOpt
 
-# Make sure that only yes or no are entered as the options
-# If no - Exit
-# If yes - Proceed
-# Other options - Ask to enter option again
+    # Make sure that only yes or no are entered as the options
+    # If no - Exit
+    # If yes - Proceed
+    # Other options - Ask to enter option again
     while true; do
       if [ $procOpt == "no" ]; then
         echo
@@ -162,7 +162,7 @@ else
     done
   fi
 
- # Store the Old VGW information
+  # Store the Old VGW information
   migData="migration_$oldVgw.txt"
   echo
   echo "Storing information in $migData"
@@ -173,7 +173,7 @@ else
   echo "AWS Region: $region" >> $migData
   echo >> $migData
 
- # Store the VPNs and CGWs in the respective array
+  # Store the VPNs and CGWs in the respective array
   vpnCount=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | wc -l)
   counter=1
   while [ $counter -le $vpnCount ]; do
@@ -182,9 +182,9 @@ else
     vpnList+=($vpn)
     cgwList+=($cgw)
 
-# For static VPNs, store the static routes in the array
-# Also store the routing type as Static for static VPNs
-# For BGP VPNs, store the routing type as BGP
+    # For static VPNs, store the static routes in the array
+    # Also store the routing type as Static for static VPNs
+    # For BGP VPNs, store the routing type as BGP
     isStatic=$(aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep StaticRoutesOnly | cut -d":" -f2)
     if [ ${isStatic} == "true" ]; then
       routingType="Static"
@@ -205,8 +205,8 @@ else
     counter=$[$counter + 1]
   done
 
-# Log all information into the file
-# Information - VPNs, CGWs, Routing Types, Static Routes, Amazon-Side BGP ASN
+  # Log all information into the file
+  # Information - VPNs, CGWs, Routing Types, Static Routes, Amazon-Side BGP ASN
   echo "VPN Connections: ${vpnList[@]}" >> $migData
   echo "CGW Ids: ${cgwList[@]}" >> $migData
   echo "Routing Types: ${routingTypeList[@]}" >> $migData
