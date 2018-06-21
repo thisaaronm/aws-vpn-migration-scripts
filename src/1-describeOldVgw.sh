@@ -121,14 +121,9 @@ vgwVpnCheck $oldVgw
 # If no, proceed
 isDxVif=$(aws directconnect describe-virtual-interfaces --region $region | grep $oldVgw)
 isDxGw=$(aws directconnect describe-direct-connect-gateway-associations --virtual-gateway-id $oldVgw --region $region | grep $oldVgw)
-if [ $isDxVif ]; then
+if [[ $isDxVif || $isDxGw ]]; then
   echo
   echo "Your VGW is affiliated with Direct Connect resources. We do not recommend using these scripts to migrate VGWs with Direct Connect objects"
-  echo "Exiting the script"
-  exit 1
-elif [ $isDxGw ]; then
-  echo
-  echo "Your VGW is affiliated with Direct Connect resources. We do not recommend using these scripts to migrate VGWs with Direct Connect objects."
   echo "Exiting the script"
   exit 1
 else
