@@ -23,13 +23,13 @@ trap kbInrpt SIGINT
 vgwExists ()
 {
   aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null
-  vgwNotExists=`echo $?`
+  vgwNotExists=$(echo $?)
     while [ $vgwNotExists == 255 ]; do
     echo
     echo "The VGW $oldVgw does not exist. Please enter a valid VGW associated with Classic VPN(s) in $region:"
     read oldVgw
     aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null
-    vgwNotExists=`echo $?`
+    vgwNotExists=$(echo $?)
   done
   oldVgw=$oldVgw
 }
@@ -39,8 +39,8 @@ vgwExists ()
 # 2 - If VGW has atleast 1 AWS VPN on it, get a valid VGW
 vgwVpnCheck ()
 {
-  vgwAws=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l`
-  vgwClassic=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l`
+  vgwAws=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l)
+  vgwClassic=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l)
   if (( $vgwAws == 0 && $vgwClassic == 0 )); then
     echo
     echo "There are no VPNs associated with the VGW $oldVgw"
@@ -52,8 +52,8 @@ vgwVpnCheck ()
       echo "The VGW $oldVgw has atleast 1 AWS VPN associated with it. Please enter a VGW associated with Classic VPN(s) in $region:"
       read oldVgw
       vgwExists $oldVgw
-      vgwAws=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l`
-      vgwClassic=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l`
+      vgwAws=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l)
+      vgwClassic=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l)
       if (( $vgwAws == 0 && $vgwClassic == 0 )); then
         echo
         echo "There are no VPNs associated with the VGW $oldVgw"
@@ -120,8 +120,8 @@ vgwVpnCheck $oldVgw
 # DX Resources - VIFs on VGW OR VGW associated with DXGW
 # If yes, give a warning about not proceeding
 # If no, proceed
-isDxVif=`aws directconnect describe-virtual-interfaces --region $region | grep $oldVgw`
-isDxGw=`aws directconnect describe-direct-connect-gateway-associations --virtual-gateway-id $oldVgw --region $region | grep $oldVgw`
+isDxVif=$(aws directconnect describe-virtual-interfaces --region $region | grep $oldVgw)
+isDxGw=$(aws directconnect describe-direct-connect-gateway-associations --virtual-gateway-id $oldVgw --region $region | grep $oldVgw)
 if [ $isDxVif ]; then
   echo
   echo "Your VGW is affiliated with Direct Connect resources. We do not recommend using these scripts to migrate VGWs with Direct Connect objects"
@@ -135,7 +135,7 @@ elif [ $isDxGw ]; then
 else
 
 # If the Old VGW is already stored in resources.txt, give an option of not storing the details again
-  isOldVgwInRes=`cat $res | grep $oldVgw | wc -l`
+  isOldVgwInRes=$(cat $res | grep $oldVgw | wc -l)
   if [ $isOldVgwInRes -eq 0 ]; then
     echo "Old VGW: $oldVgw" >> $res
   else
@@ -168,31 +168,31 @@ else
   echo "Storing information in $migData"
   echo "Storing Information on Old VGW" >> $migData
   echo >> $migData
-  echo `date` >> $migData
+  echo $(date) >> $migData
   echo "Old VGW: $oldVgw" >> $migData
   echo "AWS Region: $region" >> $migData
   echo >> $migData
 
  # Store the VPNs and CGWs in the respective array
-  vpnCount=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | wc -l`
+  vpnCount=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | wc -l)
   counter=1
   while [ $counter -le $vpnCount ]; do
-    vpn=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | awk "NR == ${counter}" | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g'`
-    cgw=`aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep CustomerGatewayId | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g'`
+    vpn=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | awk "NR == ${counter}" | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g')
+    cgw=$(aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep CustomerGatewayId | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g')
     vpnList+=($vpn)
     cgwList+=($cgw)
 
 # For static VPNs, store the static routes in the array
 # Also store the routing type as Static for static VPNs
 # For BGP VPNs, store the routing type as BGP
-    isStatic=`aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep StaticRoutesOnly | cut -d":" -f2`
+    isStatic=$(aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep StaticRoutesOnly | cut -d":" -f2)
     if [ ${isStatic} == "true" ]; then
       routingType="Static"
-      routeCount=`aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep DestinationCidrBlock | wc -l`
+      routeCount=$(aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep DestinationCidrBlock | wc -l)
       rcounter=0
       nrc=1
       while [ $rcounter -lt $routeCount ]; do
-        route[${rcounter}]=`aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep DestinationCidrBlock | awk "NR == ${nrc}" | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g'`
+        route[${rcounter}]=$(aws ec2 describe-vpn-connections --region $region --vpn-connection-id ${vpn} | grep DestinationCidrBlock | awk "NR == ${nrc}" | cut -d":" -f2 | sed "s/,//g" | sed 's/"//g')
         rcounter=$[$rcounter + 1]
         nrc=$[$nrc + 1]
       done
