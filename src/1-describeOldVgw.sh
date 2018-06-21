@@ -22,13 +22,13 @@ trap kbInrpt SIGINT
 # This function will check if the VGW exists in the given region
 vgwExists ()
 {
-  `aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null`
+  aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null
   vgwNotExists=`echo $?`
     while [ $vgwNotExists == 255 ]; do
     echo
     echo "The VGW $oldVgw does not exist. Please enter a valid VGW associated with Classic VPN(s) in $region:"
     read oldVgw
-    `aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null`
+    aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null
     vgwNotExists=`echo $?`
   done
   oldVgw=$oldVgw
@@ -68,7 +68,7 @@ vgwVpnCheck ()
 
 # Resources.txt - Store the old VGW List
 res="resources.txt"
-`touch resources.txt`
+touch resources.txt
 
 # Declare variables used to store data regarding the old VGWs
 declare -a vpnList
