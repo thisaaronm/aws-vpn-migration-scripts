@@ -1,11 +1,11 @@
+#!/usr/bin/env bash
+
 # This script will be used to store important information regarding the VGW, that will be used in the process of migration.
 # INPUTS - VGW Id of the old VGW, AWS Region
 # OUTPUTS - VPN Information (Routing Type - BGP/Static, CGW Id), Static Routes (for static VPNs)
 # ERROR CHECKS -
 # AWS Region should be correct, VGW should exist in that region, VGW should have all Classic VPNs
 # VGW should have atleast 1 Classic VPN, VGW should not have any DX resources
-
-#! /bin/bash
 
 # This function handles a Keyboard Interrupt
 # It will be logged and stored
