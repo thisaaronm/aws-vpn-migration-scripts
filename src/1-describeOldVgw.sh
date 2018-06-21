@@ -11,7 +11,7 @@
 # It will be logged and stored
 kbInrpt ()
 {
-  echo ""
+  echo
   echo "Keyboard Interrupt detected"
   echo "Exiting the script"
   exit 1
@@ -25,7 +25,7 @@ vgwExists ()
   `aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null`
   vgwNotExists=`echo $?`
     while [ $vgwNotExists == 255 ]; do
-    echo ""
+    echo
     echo "The VGW $oldVgw does not exist. Please enter a valid VGW associated with Classic VPN(s) in $region:"
     read oldVgw
     `aws ec2 describe-vpn-gateways --vpn-gateway-id $oldVgw --region $region &> /dev/null`
@@ -42,20 +42,20 @@ vgwVpnCheck ()
   vgwAws=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l`
   vgwClassic=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l`
   if (( $vgwAws == 0 && $vgwClassic == 0 )); then
-    echo ""
+    echo
     echo "There are no VPNs associated with the VGW $oldVgw"
     echo "Exiting the script"
     exit 1
   else
     while [ $vgwAws -ne 0 ]; do
-      echo ""
+      echo
       echo "The VGW $oldVgw has atleast 1 AWS VPN associated with it. Please enter a VGW associated with Classic VPN(s) in $region:"
       read oldVgw
       vgwExists $oldVgw
       vgwAws=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l`
       vgwClassic=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN-Classic"' | wc -l`
       if (( $vgwAws == 0 && $vgwClassic == 0 )); then
-        echo ""
+        echo
         echo "There are no VPNs associated with the VGW $oldVgw"
         echo "Exiting the script"
         exit 1
@@ -95,7 +95,7 @@ while [ $regFlag == 0 ]; do
     fi
   done
   if [ $regFlag == 1 ]; then
-    echo ""
+    echo
     echo "Please enter the AWS Region in which you have Classic VPN(s) [Format - us-east-1]:"
     read region
     regFlag=0
@@ -105,7 +105,7 @@ while [ $regFlag == 0 ]; do
 done
 
 # Get the old VGW
-echo ""
+echo
 echo "Please enter the VGW associated with Classic VPN(s) in $region:"
 read oldVgw
 
@@ -123,12 +123,12 @@ vgwVpnCheck $oldVgw
 isDxVif=`aws directconnect describe-virtual-interfaces --region $region | grep $oldVgw`
 isDxGw=`aws directconnect describe-direct-connect-gateway-associations --virtual-gateway-id $oldVgw --region $region | grep $oldVgw`
 if [ $isDxVif ]; then
-  echo ""
+  echo
   echo "Your VGW is affiliated with Direct Connect resources. We do not recommend using these scripts to migrate VGWs with Direct Connect objects"
   echo "Exiting the script"
   exit 1
 elif [ $isDxGw ]; then
-  echo ""
+  echo
   echo "Your VGW is affiliated with Direct Connect resources. We do not recommend using these scripts to migrate VGWs with Direct Connect objects."
   echo "Exiting the script"
   exit 1
@@ -139,7 +139,7 @@ else
   if [ $isOldVgwInRes -eq 0 ]; then
     echo "Old VGW: $oldVgw" >> $res
   else
-    echo ""
+    echo
     echo "You have already stored the information for this VGW"
     echo "Do you still want to proceed? Please enter 'yes' or 'no'"
     read procOpt
@@ -150,7 +150,7 @@ else
 # Other options - Ask to enter option again
     while true; do
       if [ $procOpt == "no" ]; then
-        echo ""
+        echo
         echo "Exiting the script"
         exit 1
       elif [ $procOpt == "yes" ]; then
@@ -164,14 +164,14 @@ else
 
  # Store the Old VGW information
   migData="migration_$oldVgw.txt"
-  echo ""
+  echo
   echo "Storing information in $migData"
   echo "Storing Information on Old VGW" >> $migData
-  echo "" >> $migData
+  echo >> $migData
   echo `date` >> $migData
   echo "Old VGW: $oldVgw" >> $migData
   echo "AWS Region: $region" >> $migData
-  echo "" >> $migData
+  echo >> $migData
 
  # Store the VPNs and CGWs in the respective array
   vpnCount=`aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep VpnConnectionId | wc -l`
@@ -210,11 +210,11 @@ else
   echo "VPN Connections: ${vpnList[@]}" >> $migData
   echo "CGW Ids: ${cgwList[@]}" >> $migData
   echo "Routing Types: ${routingTypeList[@]}" >> $migData
-  echo "" >> $migData
+  echo >> $migData
   printf '%s\n' "${staticRoute[@]}" >> $migData
 fi
 
 echo "################################################################################" >> $migData
-echo "" >> $migData
-echo ""
+echo >> $migData
+echo
 echo "Please check $migData for the information regarding $oldVgw"
