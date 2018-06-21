@@ -5,7 +5,7 @@
 # OUTPUTS - VPN Information (Routing Type - BGP/Static, CGW Id), Static Routes (for static VPNs)
 # ERROR CHECKS -
 # AWS Region should be correct, VGW should exist in that region, VGW should have all Classic VPNs
-# VGW should have atleast 1 Classic VPN, VGW should not have any DX resources
+# VGW should have at least 1 Classic VPN, VGW should not have any DX resources
 
 # This function handles a Keyboard Interrupt
 # It will be logged and stored
@@ -34,9 +34,9 @@ vgwExists ()
   oldVgw=$oldVgw
 }
 
-# This function does the following checks
+# This function will perform the following checks
 # 1 - If VGW does not have any VPNs on it, exit the script
-# 2 - If VGW has atleast 1 AWS VPN on it, get a valid VGW
+# 2 - If VGW has at least 1 AWS VPN on it, get a valid VGW
 vgwVpnCheck ()
 {
   vgwAws=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l)
@@ -49,7 +49,7 @@ vgwVpnCheck ()
   else
     while [ $vgwAws -ne 0 ]; do
       echo
-      echo "The VGW $oldVgw has atleast 1 AWS VPN associated with it. Please enter a VGW associated with Classic VPN(s) in $region:"
+      echo "The VGW $oldVgw has at least 1 AWS VPN associated with it. Please enter a VGW associated with Classic VPN(s) in $region:"
       read oldVgw
       vgwExists $oldVgw
       vgwAws=$(aws ec2 describe-vpn-connections --region $region --filters Name=vpn-gateway-id,Values=$oldVgw | grep '"Category": "VPN"' | wc -l)
@@ -106,14 +106,14 @@ done
 
 # Get the old VGW
 echo
-echo "Please enter the VGW associated with Classic VPN(s) in $region:"
+echo "Please enter the VGW associated with Classic VPN(s) in $region [Format - vgw-########]:"
 read oldVgw
 
 # Check 1 - VGW exists in the region
 vgwExists $oldVgw
 
 # Check 2 - VGW does not have an AWS VPN
-# If there is atleast 1 AWS VPN on the VGW, re-enter the VGW with only Classic VPNs on it
+# If there is at least 1 AWS VPN on the VGW, re-enter the VGW with only Classic VPNs on it
 vgwVpnCheck $oldVgw
 
 # Check if there are any DX resources on the VGW
